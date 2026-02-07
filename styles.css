@@ -1,76 +1,64 @@
-/* styles.css - Professional Styling for Web Design Portfolio */
+// Smooth nav scrolling and reveal-on-scroll
+document.addEventListener('DOMContentLoaded', () => {
+  // set copyright year
+  const y = document.getElementById('year');
+  if (y) y.textContent = new Date().getFullYear();
 
-body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    color: #333;
-    background-color: #f8f8f8;
-}
+  // mobile nav toggle
+  const toggle = document.querySelector('.nav-toggle');
+  const navList = document.getElementById('nav-list');
+  if (toggle && navList) {
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!expanded));
+      navList.classList.toggle('show');
+    });
+  }
 
-header {
-    background: #4CAF50;
-    color: white;
-    padding: 15px;
-    text-align: center;
-}
+  // smooth scroll for in-page links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const href = a.getAttribute('href');
+      if (!href || href === '#') return;
+      const el = document.querySelector(href);
+      if (el) {
+        e.preventDefault();
+        el.scrollIntoView({behavior:'smooth',block:'start'});
+        // close mobile nav
+        if (navList && navList.classList.contains('show')) navList.classList.remove('show');
+      }
+    });
+  });
 
-h1, h2, h3 {
-    margin: 0;
-}
+  // Intersection observer for reveal animations
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in-view');
+        // If element should animate only once, unobserve
+        if (e.target.classList.contains('animate-once')) {
+          io.unobserve(e.target);
+        }
+      }
+    });
+  }, {threshold: 0.12});
 
-nav {
-    margin: 15px 0;
-}
+  document.querySelectorAll('.animate-once, .reveal, .reveal-up, .reveal-scale, .reveal-fade, .reveal-left').forEach(el => {
+    io.observe(el);
+  });
 
-nav a {
-    color: white;
-    padding: 14px 20px;
-    text-decoration: none;
-    text-transform: uppercase;
-}
-
-nav a:hover {
-    background-color: #45a049;
-    transition: background-color 0.3s;
-}
-
-.container {
-    width: 80%;
-    margin: auto;
-    overflow: hidden;
-}
-
-.card {
-    background: white;
-    border-radius: 5px;
-    margin: 15px 0;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-}
-
-.footer {
-    background: #333;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    position: relative;
-    bottom: 0;
-    width: 100%;
-}
-
-@media (max-width: 600px) {
-    .container {
-        width: 100%;
-        padding: 0 10px;
-    }
-    nav a {
-        padding: 10px;
-        display: block;
-    }
-}
+  // subtle parallax on mouse move for hero mockup
+  const hero = document.querySelector('.hero-inner');
+  const mockup = document.querySelector('.hero-card');
+  if (hero && mockup) {
+    hero.addEventListener('mousemove', (ev) => {
+      const r = hero.getBoundingClientRect();
+      const px = (ev.clientX - r.left) / r.width - 0.5;
+      const py = (ev.clientY - r.top) / r.height - 0.5;
+      mockup.style.transform = `translate3d(${px * 14}px, ${py * 10}px, 0) rotate(${px * 1.5}deg)`;
+    });
+    hero.addEventListener('mouseleave', () => {
+      mockup.style.transform = '';
+    });
+  }
+});
